@@ -237,6 +237,21 @@ namespace Google.XR.ARCoreExtensions.Internal
 
         private struct ExternApi
         {
+            #if UNITY_EDITOR
+            public static ApiArStatus ArSession_create(string apiKey, string bundleIdentifier, ref IntPtr sessionHandle) {
+                sessionHandle = ARCoreCloudAnchorsEditorDelegate.dummySessionPtr;
+                return ApiArStatus.Success;
+            }
+
+            public static void ArSession_destroy(IntPtr sessionHandle) {
+                UnityEngine.Assertions.Assert.AreEqual(ARCoreCloudAnchorsEditorDelegate.dummySessionPtr, sessionHandle);
+            }
+
+            public static ApiArStatus ArSession_updateAndAcquireArFrame(IntPtr sessionHandle, IntPtr arkitFrameHandle, ref IntPtr arFrame) {
+                UnityEngine.Assertions.Assert.AreEqual(ARCoreCloudAnchorsEditorDelegate.dummyFramePtr, arkitFrameHandle);
+                return ApiArStatus.Success;
+            }
+            #else
             [IOSImport(ApiConstants.ARCoreNativeApi)]
             public static extern ApiArStatus ArSession_create(
                 string apiKey, string bundleIdentifier, ref IntPtr sessionHandle);
@@ -247,6 +262,7 @@ namespace Google.XR.ARCoreExtensions.Internal
 
             [DllImport(ApiConstants.ARCoreNativeApi)]
             public static extern void ArSession_destroy(IntPtr session);
+            #endif
         }
     }
 }
